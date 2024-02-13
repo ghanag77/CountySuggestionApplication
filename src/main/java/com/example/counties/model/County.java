@@ -10,6 +10,8 @@ public class County {
     private String state;
     private String name;
 
+    public County() {}
+
     public County(String fips, String state, String name) {
         this.fips = fips;
         this.state = state;
