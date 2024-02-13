@@ -15,10 +15,35 @@ public class CountyService {
     private CountyRepository countyRepository;
 
     public List<County> suggestCounties(String query) {
+        String nameQuery = "";
+        String stateQuery = "";
+
+        if (query.contains(",")) {
+            String[] parts = query.split(",", 2);
+            nameQuery = parts[0].trim().toLowerCase();
+            if (parts.length > 1) {
+                stateQuery = parts[1].trim().toLowerCase();
+            }
+        } else if (query.trim().length() == 2) {
+            stateQuery = query.trim().toLowerCase();
+        } else {
+            nameQuery = query.trim().toLowerCase();
+        }
+
+        final String finalNameQuery = nameQuery;
+        final String finalStateQuery = stateQuery;
+
         List<County> allCounties = countyRepository.findAll();
         return allCounties.stream()
-                .filter(county -> county.getName().toLowerCase().contains(query.toLowerCase()) || county.getState().toLowerCase().equals(query.toLowerCase()))
+                .filter(county -> matchesQuery(county, finalNameQuery, finalStateQuery))
                 .limit(5)
                 .collect(Collectors.toList());
+    }
+
+    private boolean matchesQuery(County county, String nameQuery, String stateQuery) {
+        boolean matchesName = nameQuery.isEmpty() || county.getName().toLowerCase().contains(nameQuery);
+        boolean matchesState = stateQuery.isEmpty() || county.getState().toLowerCase().equals(stateQuery);
+
+        return matchesName && matchesState;
     }
 }
